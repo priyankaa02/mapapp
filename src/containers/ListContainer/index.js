@@ -14,7 +14,8 @@ const ListContainer = () => {
     navigateAndReset(ScreenNames.MapContainer);
   };
   const propertyList = useSelector(getListSelectors.selectPropertyList);
-  return <List getList={propertyList} onClickBack={onClickBack} />;
+  const loading = useSelector(getListSelectors.selectLoading);
+  return <List getList={propertyList} onClickBack={onClickBack} loading={loading}/>;
 };
 
 export default ListContainer;

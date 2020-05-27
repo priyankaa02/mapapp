@@ -4,15 +4,16 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
-  TextInput,
+  TouchableHighlight,
+  Modal,
+  Alert,
   SafeAreaView,
 } from 'react-native';
 import {dimensions, responsive} from '../../styles/variables';
 import FastImage from 'react-native-fast-image';
 import Text from 'react-native-text';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import MapView, {Marker, PROVIDER_GOOGLE, Polygon, ProviderPropType,} from 'react-native-maps';
 // import {TouchableOpacity, TouchableHighlight} from 'react-native-gesture-handler';
 
 const mainStyles = StyleSheet.create({
@@ -23,6 +24,9 @@ const mainStyles = StyleSheet.create({
     // alignItems: 'center',
     // justifyContent: 'center',
     // position: 'relative',
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    alignItems: 'center'
   },
   map: {
     width: dimensions.width,
@@ -34,6 +38,66 @@ const mainStyles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: 'rgba(130,4,150, 0.9)',
   },
+  map: {
+    ...StyleSheet.absoluteFillObject
+  },
+  bubble: {
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 20
+  },
+  latlng: {
+    width: 200,
+    alignItems: 'stretch'
+  },
+  button: {
+    width: 80,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    marginHorizontal: 10
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginVertical: 20,
+    backgroundColor: 'transparent'
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5
+  },
+  openButton: {
+    backgroundColor: "#F194FF",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
+  }
 });
 
 const mapStyle = [
@@ -113,10 +177,32 @@ const mapStyle = [
   },
 ];
 
-const Map = ({coordinates, addMarker, markers, onPressMarker}) => {
+const Map = ({
+  coordinates,
+  addMarker,
+  markers,
+  onPressMarker,
+  polygons, 
+  editing,
+  creatingHole,
+  finish,
+  clear,
+  createHole,
+  modalVisible,
+  onClickModal,
+  onClickResult,
+  onPress}) => {
+  const mapOptions = {
+    scrollEnabled: true
+  }
+
+  if (editing) {
+    mapOptions.scrollEnabled = false
+    mapOptions.onPanDrag = e => onPress(e)
+  }
   return (
     <SafeAreaView style={mainStyles.container}>
-      <MapView
+      {/* <MapView
         // provider={PROVIDER_GOOGLE}
         style={mainStyles.map}
         region={coordinates}
@@ -134,7 +220,89 @@ const Map = ({coordinates, addMarker, markers, onPressMarker}) => {
             />
           );
         })}
-      </MapView>
+      </MapView> */}
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={mainStyles.map}
+          initialRegion={coordinates}
+          customMapStyle={mapStyle}
+          onPress={e => onPress(e)}
+          {...mapOptions}
+        >
+          {polygons.map(polygon => (
+            <Polygon
+              key={polygon.id}
+              coordinates={polygon.coordinates}
+              holes={polygon.holes}
+              strokeColor="#F00"
+              fillColor="rgba(255,0,0,0.5)"
+              strokeWidth={1}
+            />
+          ))}
+          {editing && (
+            <Polygon
+              key={editing.id}
+              coordinates={editing.coordinates}
+              holes={editing.holes}
+              strokeColor="#F00"
+              fillColor="rgba(255,0,0,0.5)"
+              strokeWidth={1}
+            />
+          )}
+        </MapView>
+
+        <View style={mainStyles.buttonContainer}>
+          {/* {editing && (
+            <TouchableOpacity
+              onPress={() => createHole()}
+              style={[mainStyles.bubble, mainStyles.button]}
+            >
+              <Text>
+                {creatingHole ? 'Finish Hole' : 'Create Hole'}
+              </Text>
+            </TouchableOpacity>
+          )} */}
+          {editing && (
+            <TouchableOpacity
+              onPress={() => finish()}
+              style={[mainStyles.bubble, mainStyles.button]}
+            >
+              <Text>Finish</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        <TouchableOpacity
+          onPress={() => clear()}
+          style={[mainStyles.bubble, mainStyles.button]}
+        >
+          <Text>Clear</Text>
+        </TouchableOpacity>
+        <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+        }}
+      >
+        <View style={mainStyles.centeredView}>
+          <View style={mainStyles.modalView}>
+            <Text style={mainStyles.modalText}>You have drawn a new area on Map</Text>
+            <TouchableHighlight
+              style={{ ...mainStyles.openButton }}
+              onPress={() => {onClickModal(!modalVisible), onClickResult()}}
+            >
+              <Text style={mainStyles.textStyle}>Show Results</Text>
+            </TouchableHighlight>
+            <TouchableHighlight
+              style={{ ...mainStyles.openButton, backgroundColor: "#2196F3", marginTop: 20 }}
+              onPress={() => {onClickModal(!modalVisible), clear()}}
+            >
+              <Text style={mainStyles.textStyle}>Close</Text>
+            </TouchableHighlight>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

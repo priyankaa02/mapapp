@@ -3,25 +3,32 @@ const name = 'getList';
 export const types = {
   GET_PROPERTY_LIST: `${name}/GET_PROPERTY_LIST`,
   PROPERTY_LIST_RESPONSE: `${name}/PROPERTY_LIST_RESPONSE`,
+  SET_LOADING: `${name}/SET_LOADING`,
 };
 
 const initialState = {
   propertyList: [],
+  loading: false,
 };
 
 export const selectors = {
   selectPropertyList: (state) => state[name].propertyList,
+  selectLoading: (state) => state[name].loading,
 };
 
 export const actions = {
-  getPropertyList: (lat, lng) => ({
+  getPropertyList: (data) => ({
     type: types.GET_PROPERTY_LIST,
-    payload: {lat, lng},
+    payload: {data},
   }),
   propertyListResponse: (response) => ({
     type: types.PROPERTY_LIST_RESPONSE,
     payload: response,
   }),
+  setLoading: (value) => ({
+    type: types.SET_LOADING,
+    payload: value
+  })
 };
 
 export const getPlaceUrl = (lat, lng, radius, type, apiKey) => {
@@ -45,6 +52,12 @@ export default (state = initialState, action) => {
       return {
         ...state,
         propertyList: action.payload,
+      };
+    }
+    case types.SET_LOADING: {
+      return {
+        ...state,
+        loading: action.payload,
       };
     }
     default:

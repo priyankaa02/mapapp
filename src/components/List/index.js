@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useCallback, useEffect} from 'react';
-import {View, StyleSheet, ScrollView, TextInput, FlatList} from 'react-native';
+import {View, StyleSheet, ScrollView, TextInput, FlatList, ActivityIndicator} from 'react-native';
 import {dimensions, responsive} from '../../styles/variables';
 // import {ListRow} from './ListRow';
 import FastImage from 'react-native-fast-image';
@@ -38,7 +38,7 @@ const mainStyles = StyleSheet.create({
     marginTop: 20,
   },
 });
-const List = ({getList, onClickBack}) => {
+const List = ({getList, onClickBack, loading}) => {
   console.log('getList', getList);
   return (
     <View style={mainStyles.container}>
@@ -48,7 +48,8 @@ const List = ({getList, onClickBack}) => {
         onPress={onClickBack}>
         <Icon name="arrowleft" size={20} />
       </TouchableOpacity>
-      <Text style={mainStyles.txt1}>{'Restaurants List'}</Text>
+      <Text style={mainStyles.txt1}>{'Properties List'}</Text>
+      {loading && <ActivityIndicator size="large" color="#0000ff" style={{marginTop: 200}}/>}
       {getList && getList.length > 0 && (
         <FlatList
           data={getList}
@@ -62,7 +63,7 @@ const List = ({getList, onClickBack}) => {
           keyExtractor={(item) => item.id}
         />
       )}
-      {getList.length === 0 && (
+      {!loading && getList.length === 0 && (
         <Text style={mainStyles.txt}>{'No data found'}</Text>
       )}
     </View>

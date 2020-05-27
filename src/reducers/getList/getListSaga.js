@@ -12,20 +12,31 @@ import {navigateAndReset} from '../../navigators/NavigationService';
 import ScreenNames from '../../navigators/ScreenNames';
 
 function* getPropertyList(action) {
-  const {lat, lng} = action.payload;
-  const responseJson = yield call(fetchApi, {
-    url: getPlaceUrl(
-      lat,
-      lng,
-      1500,
-      'restaurant',
-      'AIzaSyADaN7V9PqwBTD6FwP2zu6YqodJpbkq7bU',
-    ),
-  });
-  console.log('responseJson', responseJson);
+  const {data} = action.payload;
+  console.log('data.length', data);
+  let res = []
+  // navigateAndReset(ScreenNames.ListContainer);
+  yield put(getListActions.setLoading(true));
+  for(let i = 0; i < data.length; i++) {
+    const responseJson = yield call(fetchApi, {
+      url: getPlaceUrl(
+        data[i].latitude,
+        data[i].longitude,
+        1500,
+        'properties',
+        'AIzaSyADaN7V9PqwBTD6FwP2zu6YqodJpbkq7bU',
+      ),
+    });
+    if(responseJson.length > 0) {
+      for (let i = 0; i < responseJson.length; i++) {
+        res.push(responseJson[i]);
+      }
+    }
+  }
+  console.log('responseJson', res);
   // const {data} = responseJson;
-  yield put(getListActions.propertyListResponse(responseJson));
-  navigateAndReset(ScreenNames.ListContainer);
+  yield put(getListActions.setLoading(false));
+  yield put(getListActions.propertyListResponse(res));
 }
 
 export default [takeLatest(getListTypes.GET_PROPERTY_LIST, getPropertyList)];

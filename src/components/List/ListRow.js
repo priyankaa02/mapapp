@@ -9,16 +9,16 @@ export const ListRow = ({obj}) => {
   return (
     <View style={hstyles.row}>
       <Image
-        source={{uri: obj.icon}}
+        source={{uri: obj && obj.icon}}
         resizeMode={'contain'}
         style={hstyles.img}
       />
       <View style={{marginTop: 40}}>
-        <Text style={hstyles.title1}>{obj.name}</Text>
+        <Text style={hstyles.title1}>{obj && obj.name}</Text>
         <Text style={hstyles.title}>
-          {'Rating: ' + (obj.rating ? obj.rating : '3')}
+          {'Rating: ' + (obj && obj.rating ? obj.rating : '3')}
         </Text>
-        <Text style={hstyles.title2}>{obj.vicinity}</Text>
+        <Text style={hstyles.title2}>{obj && obj.vicinity}</Text>
       </View>
     </View>
   );
